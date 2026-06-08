@@ -13,16 +13,9 @@ jobs:
 
       - name: Install Zig 0.15.2
         run: |
-          brew install zig@0.15.2 || true
-          # Fallback: download directly if brew doesn't have it
-          if ! zig version 2>/dev/null | grep -q "0.15.2"; then
-            curl -L https://ziglang.org/download/0.15.2/zig-macos-aarch64-0.15.2.tar.xz -o /tmp/zig.tar.xz
-            tar xf /tmp/zig.tar.xz -C /tmp
-            echo "/tmp/zig-macos-aarch64-0.15.2" >> "$GITHUB_PATH"
-          fi
-
-      - name: Verify Zig version
-        run: zig version
+          curl -L https://ziglang.org/download/0.15.2/zig-aarch64-macos-0.15.2.tar.xz -o /tmp/zig.tar.xz
+          tar xf /tmp/zig.tar.xz -C /tmp
+          echo "/tmp/zig-aarch64-macos-0.15.2" >> "$GITHUB_PATH"
 
       - name: Build Ghostty (ReleaseFast)
         run: zig build -Doptimize=ReleaseFast
