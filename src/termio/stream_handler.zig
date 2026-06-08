@@ -332,14 +332,13 @@ pub const StreamHandler = struct {
             .clipboard_contents => try self.clipboardContents(value.kind, value.data),
             .semantic_prompt => try self.semanticPrompt(value),
             .ghostty_action => |v| {
-                const value_: []const u8 = v.value;
                 var buf: [256]u8 = undefined;
-                if (value_.len >= buf.len) {
-                    log.warn("ghostty_action payload too long: {d} bytes", .{value_.len});
+                if (v.len >= buf.len) {
+                    log.warn("ghostty_action payload too long: {d} bytes", .{v.len});
                     return;
                 }
-                @memcpy(buf[0..value_.len], value_);
-                buf[value_.len] = 0;
+                @memcpy(buf[0..v.len], v);
+                buf[v.len] = 0;
                 self.surfaceMessageWriter(.{ .ghostty_action = buf });
             },
             .mouse_shape => try self.setMouseShape(value),

@@ -125,11 +125,7 @@ pub const Action = union(Key) {
     kitty_color_report: kitty.color.OSC,
     color_operation: ColorOperation,
     semantic_prompt: SemanticPrompt,
-    ghostty_action: GhosttyAction,
-
-    pub const GhosttyAction = struct {
-        value: [:0]const u8,
-    };
+    ghostty_action: [:0]const u8,
 
     pub const Key = lib.Enum(
         lib.target,
@@ -2070,7 +2066,7 @@ pub fn Stream(comptime H: type) type {
                 },
 
                 .ghostty_action => |v| {
-                    self.handler.vt(.ghostty_action, .{ .value = v.value });
+                    self.handler.vt(.ghostty_action, v.value);
                 },
 
                 .invalid => {

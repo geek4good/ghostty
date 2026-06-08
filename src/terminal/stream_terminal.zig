@@ -290,6 +290,7 @@ pub const Handler = struct {
             .clipboard_contents,
             .title_push,
             .title_pop,
+            .ghostty_action,
             => {},
         }
     }
