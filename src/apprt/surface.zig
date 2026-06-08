@@ -108,6 +108,9 @@ pub const Message = union(enum) {
     /// Selected search index change
     search_selected: ?usize,
 
+    /// Ghostty action dispatch from OSC 7770.
+    ghostty_action: [256]u8,
+
     pub const ReportTitleStyle = enum {
         csi_21_t,
 

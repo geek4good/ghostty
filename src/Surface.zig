@@ -1164,6 +1164,18 @@ pub fn handleMessage(self: *Surface, msg: Message) !void {
                 .{ .selected = v },
             );
         },
+
+        .ghostty_action => |buf| {
+            const action_str = std.mem.sliceTo(&buf, 0);
+            if (action_str.len == 0) return;
+
+            const binding_action = input.Binding.Action.parse(action_str) catch |err| {
+                log.warn("invalid ghostty_action from OSC 7770: {s} err={}", .{ action_str, err });
+                return;
+            };
+
+            _ = try self.performBindingAction(binding_action);
+        },
     }
 }
 

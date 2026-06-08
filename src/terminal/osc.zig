@@ -160,6 +160,12 @@ pub const Command = union(Key) {
     /// https://uapi-group.org/specifications/specs/osc_context/
     context_signal: parsers.context_signal.Command,
 
+    /// OSC 7770. Ghostty action dispatch. Allows terminal applications
+    /// to request Ghostty actions (e.g., goto_split:left for pane navigation).
+    ghostty_action: struct {
+        value: [:0]const u8,
+    },
+
     pub const SemanticPrompt = parsers.semantic_prompt.Command;
 
     pub const KittyClipboardProtocol = parsers.kitty_clipboard_protocol.OSC;
@@ -193,6 +199,7 @@ pub const Command = union(Key) {
             "kitty_text_sizing",
             "kitty_clipboard_protocol",
             "context_signal",
+            "ghostty_action",
         },
     );
 
@@ -232,6 +239,9 @@ pub const Command = union(Key) {
     };
 
     comptime {
+        // The ghostty_action variant ([:0]const u8, 16 bytes on 64-bit) is
+        // smaller than the largest existing variant (context_signal.Command),
+        // so the union size does not increase beyond its current 64-byte max.
         assert(@sizeOf(Command) == switch (@sizeOf(usize)) {
             4 => 44,
             8 => 64,
@@ -359,6 +369,7 @@ pub const Parser = struct {
         @"133",
         @"552",
         @"777",
+        @"7770",
         @"1337",
         @"5522",
     };
@@ -422,6 +433,7 @@ pub const Parser = struct {
             .kitty_text_sizing,
             .kitty_clipboard_protocol,
             .context_signal,
+            .ghostty_action,
             => {},
         }
 
@@ -724,9 +736,19 @@ pub const Parser = struct {
                 else => self.state = .invalid,
             },
 
+            .@"777" => switch (c) {
+                '0' => self.state = .@"7770",
+                ';' => self.captureTrailing(.fixed),
+                else => self.state = .invalid,
+            },
+
+            .@"7770" => switch (c) {
+                ';' => self.captureTrailing(.fixed),
+                else => self.state = .invalid,
+            },
+
             .@"0",
             .@"22",
-            .@"777",
             .@"8",
             .@"9",
             => switch (c) {
@@ -812,6 +834,8 @@ pub const Parser = struct {
             .@"552" => null,
 
             .@"777" => parsers.rxvt_extension.parse(self, terminator_ch),
+
+            .@"7770" => parsers.ghostty_action.parse(self, terminator_ch),
 
             .@"1337" => parsers.iterm2.parse(self, terminator_ch),
 

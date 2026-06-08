@@ -125,6 +125,11 @@ pub const Action = union(Key) {
     kitty_color_report: kitty.color.OSC,
     color_operation: ColorOperation,
     semantic_prompt: SemanticPrompt,
+    ghostty_action: GhosttyAction,
+
+    pub const GhosttyAction = struct {
+        value: [:0]const u8,
+    };
 
     pub const Key = lib.Enum(
         lib.target,
@@ -222,6 +227,7 @@ pub const Action = union(Key) {
             "kitty_color_report",
             "color_operation",
             "semantic_prompt",
+            "ghostty_action",
         },
     );
 
@@ -2061,6 +2067,10 @@ pub fn Stream(comptime H: type) type {
                 .context_signal,
                 => {
                     log.debug("unimplemented OSC callback: {}", .{cmd});
+                },
+
+                .ghostty_action => |v| {
+                    self.handler.vt(.ghostty_action, .{ .value = v.value });
                 },
 
                 .invalid => {
