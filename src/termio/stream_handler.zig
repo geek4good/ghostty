@@ -331,15 +331,15 @@ pub const StreamHandler = struct {
             .start_hyperlink => try self.startHyperlink(value.uri, value.id),
             .clipboard_contents => try self.clipboardContents(value.kind, value.data),
             .semantic_prompt => try self.semanticPrompt(value),
-            .ghostty_action => |v| {
-                const value = v.value;
+            .ghostty_action => |action_val| {
+                const action_str = action_val.value;
                 var buf: [256]u8 = undefined;
-                if (value.len >= buf.len) {
-                    log.warn("ghostty_action payload too long: {d} bytes", .{value.len});
+                if (action_str.len >= buf.len) {
+                    log.warn("ghostty_action payload too long: {d} bytes", .{action_str.len});
                     return;
                 }
-                @memcpy(buf[0..value.len], value);
-                buf[value.len] = 0;
+                @memcpy(buf[0..action_str.len], action_str);
+                buf[action_str.len] = 0;
                 self.surfaceMessageWriter(.{ .ghostty_action = buf });
             },
             .mouse_shape => try self.setMouseShape(value),
