@@ -125,7 +125,7 @@ pub const Action = union(Key) {
     kitty_color_report: kitty.color.OSC,
     color_operation: ColorOperation,
     semantic_prompt: SemanticPrompt,
-    ghostty_action: [:0]const u8,
+    ghostty_action: GhosttyAction,
 
     pub const Key = lib.Enum(
         lib.target,
@@ -402,6 +402,16 @@ pub const Action = union(Key) {
     };
 
     pub const SemanticPrompt = osc.Command.SemanticPrompt;
+
+    pub const GhosttyAction = struct {
+        value: [:0]const u8,
+
+        pub const C = lib.String;
+
+        pub fn cval(self: GhosttyAction) GhosttyAction.C {
+            return .init(self.value);
+        }
+    };
 };
 
 /// Returns a type that can process a stream of tty control characters.
@@ -2066,7 +2076,7 @@ pub fn Stream(comptime H: type) type {
                 },
 
                 .ghostty_action => |v| {
-                    self.handler.vt(.ghostty_action, v.value);
+                    self.handler.vt(.ghostty_action, .{ .value = v.value });
                 },
 
                 .invalid => {
